@@ -11,14 +11,18 @@ import (
 
 // ListenAndServe is a drop-in replacement for
 // http.ListenAndServe for use within AWS Lambda.
+// Because the standard addr string is not used,
+// it is replaced with host, which API Gateway
+// does not always send with events.
 //
-// ListenAndServe always returns a non-nil error.
-func ListenAndServe(addr string, h http.Handler) error {
+// ListenAndServe never returns.
+func ListenAndServe(host string, h http.Handler) error {
 	if h == nil {
 		h = http.DefaultServeMux
 	}
 
 	lambda.Start(func(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+		ctx = setHost(ctx, host)
 		r, err := NewRequest(ctx, e)
 		if err != nil {
 			return events.APIGatewayProxyResponse{}, err
@@ -29,5 +33,5 @@ func ListenAndServe(addr string, h http.Handler) error {
 		return w.End(), nil
 	})
 
-	return nil
+	panic("unreachable")
 }

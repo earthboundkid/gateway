@@ -105,8 +105,9 @@ func TestNewRequest_header(t *testing.T) {
 			Stage:     "prod",
 		},
 	}
-
-	r, err := NewRequest(context.Background(), e)
+	ctx := context.Background()
+	ctx = setHost(ctx, "xxx")
+	r, err := NewRequest(ctx, e)
 	assert.NoError(t, err)
 
 	assert.Equal(t, `example.com`, r.Host)
@@ -115,6 +116,27 @@ func TestNewRequest_header(t *testing.T) {
 	assert.Equal(t, `18`, r.Header.Get("Content-Length"))
 	assert.Equal(t, `application/json`, r.Header.Get("Content-Type"))
 	assert.Equal(t, `bar`, r.Header.Get("X-Foo"))
+}
+
+func TestNewRequest_host(t *testing.T) {
+	e := events.APIGatewayProxyRequest{
+		HTTPMethod: "POST",
+		Path:       "/pets",
+		Body:       `{ "name": "Tobi" }`,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+			"X-Foo":        "bar",
+		},
+		RequestContext: events.APIGatewayProxyRequestContext{
+			RequestID: "1234",
+			Stage:     "prod",
+		},
+	}
+	ctx := context.Background()
+	ctx = setHost(ctx, "example.com")
+	r, err := NewRequest(ctx, e)
+	assert.NoError(t, err)
+	assert.Equal(t, `example.com`, r.Host)
 }
 
 func TestNewRequest_multiHeader(t *testing.T) {

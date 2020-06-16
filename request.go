@@ -21,8 +21,18 @@ func wraperr(err error, msg string) error {
 
 // NewRequest returns a new http.Request from the given Lambda event.
 func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Request, error) {
+	host := e.Headers["Host"]
+	if host == "" {
+		host = getHost(ctx)
+	}
+	hostURL := &url.URL{
+		Scheme: e.Headers["X-Forwarded-Proto"],
+		Host:   host,
+		Path:   "/",
+	}
+
 	// path
-	u, err := url.Parse(e.Path)
+	u, err := hostURL.Parse(e.Path)
 	if err != nil {
 		return nil, wraperr(err, "parsing path")
 	}
@@ -85,10 +95,6 @@ func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Req
 	if traceID := ctx.Value("x-amzn-trace-id"); traceID != nil {
 		req.Header.Set("X-Amzn-Trace-Id", fmt.Sprintf("%v", traceID))
 	}
-
-	// host
-	req.URL.Host = req.Header.Get("Host")
-	req.Host = req.URL.Host
 
 	return req, nil
 }

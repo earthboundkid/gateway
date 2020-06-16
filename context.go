@@ -10,7 +10,10 @@ import (
 type key int
 
 // requestContextKey is the key for the api gateway proxy `RequestContext`.
-const requestContextKey key = iota
+const (
+	requestContextKey key = iota
+	hostContextKey
+)
 
 // newContext returns a new Context with specific api gateway proxy values.
 func newContext(ctx context.Context, e events.APIGatewayProxyRequest) context.Context {
@@ -21,4 +24,13 @@ func newContext(ctx context.Context, e events.APIGatewayProxyRequest) context.Co
 func RequestContext(ctx context.Context) (events.APIGatewayProxyRequestContext, bool) {
 	c, ok := ctx.Value(requestContextKey).(events.APIGatewayProxyRequestContext)
 	return c, ok
+}
+
+func setHost(ctx context.Context, host string) context.Context {
+	return context.WithValue(ctx, hostContextKey, host)
+}
+
+func getHost(ctx context.Context) string {
+	host, _ := ctx.Value(hostContextKey).(string)
+	return host
 }
