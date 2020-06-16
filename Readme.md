@@ -1,6 +1,11 @@
-<img src="http://tjholowaychuk.com:6000/svg/title/APEX/GATEWAY">
+[![GoDoc](https://godoc.org/github.com/carlmjohnson/gatweay?status.svg)](https://godoc.org/github.com/carlmjohnson/gateway)
+![](https://img.shields.io/badge/license-MIT-blue.svg)
+![](https://img.shields.io/badge/status-stable-green.svg)
+ [![Calver v0.YY.Minor](https://img.shields.io/badge/calver-v0.YY.Minor-22bfda.svg)](https://calver.org)
 
 Package gateway provides a drop-in replacement for net/http's `ListenAndServe` for use in AWS Lambda & API Gateway, simply swap it out for `gateway.ListenAndServe`. Extracted from [Up](https://github.com/apex/up) which provides additional middleware features and operational functionality.
+
+This version is forked from [Apex/gateway](https://github.com/apex/gateway), which tended to merge pull requests very infrequently. Another fork, by [piotrkubisa](https://github.com/piotrkubisa/apigo), was good, but he has discontinued work.
 
 ```go
 package main
@@ -30,11 +35,3 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello %s from Go", userID)
 }
 ```
-
----
-
-[![GoDoc](https://godoc.org/github.com/apex/up-go?status.svg)](https://godoc.org/github.com/carlmjohnson/gateway)
-![](https://img.shields.io/badge/license-MIT-blue.svg)
-![](https://img.shields.io/badge/status-stable-green.svg)
-
-<a href="https://apex.sh"><img src="http://tjholowaychuk.com:6000/svg/sponsor"></a>
