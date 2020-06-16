@@ -9,14 +9,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/carlmjohnson/gateway"
 )
 
 func main() {
 	http.HandleFunc("/", hello)
-	log.Fatal(gateway.ListenAndServe(":3000", nil))
+	log.Fatal(gateway.ListenAndServe("n/a", nil))
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
