@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/apex/gateway"
+	"github.com/carlmjohnson/gateway"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 ---
 
-[![GoDoc](https://godoc.org/github.com/apex/up-go?status.svg)](https://godoc.org/github.com/apex/gateway)
+[![GoDoc](https://godoc.org/github.com/apex/up-go?status.svg)](https://godoc.org/github.com/carlmjohnson/gateway)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 ![](https://img.shields.io/badge/status-stable-green.svg)
 
