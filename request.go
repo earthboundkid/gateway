@@ -10,15 +10,21 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/pkg/errors"
 )
+
+func wraperr(err error, msg string) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("%s: %w", msg, err)
+}
 
 // NewRequest returns a new http.Request from the given Lambda event.
 func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Request, error) {
 	// path
 	u, err := url.Parse(e.Path)
 	if err != nil {
-		return nil, errors.Wrap(err, "parsing path")
+		return nil, wraperr(err, "parsing path")
 	}
 
 	// querystring
@@ -37,7 +43,7 @@ func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Req
 	if e.IsBase64Encoded {
 		b, err := base64.StdEncoding.DecodeString(body)
 		if err != nil {
-			return nil, errors.Wrap(err, "decoding base64 body")
+			return nil, wraperr(err, "decoding base64 body")
 		}
 		body = string(b)
 	}
@@ -45,12 +51,12 @@ func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Req
 	// new request
 	req, err := http.NewRequest(e.HTTPMethod, u.String(), strings.NewReader(body))
 	if err != nil {
-		return nil, errors.Wrap(err, "creating request")
+		return nil, wraperr(err, "creating request")
 	}
 
 	// manually set RequestURI because NewRequest is for clients and req.RequestURI is for servers
 	req.RequestURI = e.Path
-	
+
 	// remote addr
 	req.RemoteAddr = e.RequestContext.Identity.SourceIP
 
