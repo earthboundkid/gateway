@@ -19,14 +19,27 @@ func wraperr(err error, msg string) error {
 	return fmt.Errorf("%s: %w", msg, err)
 }
 
+func mergeValues(single map[string]string, multi map[string][]string) map[string][]string {
+	m := make(map[string][]string, len(single)+len(multi))
+	for k, v := range single {
+		m[k] = []string{v}
+	}
+	// Let multi trump single if both are set
+	for k, v := range multi {
+		m[k] = v
+	}
+	return m
+}
+
 // NewRequest returns a new http.Request from the given Lambda event.
 func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Request, error) {
-	host := e.Headers["Host"]
+	var header http.Header = mergeValues(e.Headers, e.MultiValueHeaders)
+	host := header.Get("Host")
 	if host == "" {
 		host = getHost(ctx)
 	}
 	hostURL := &url.URL{
-		Scheme: e.Headers["X-Forwarded-Proto"],
+		Scheme: header.Get("X-Forwarded-Proto"),
 		Host:   host,
 		Path:   "/",
 	}
@@ -37,16 +50,11 @@ func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Req
 		return nil, wraperr(err, "parsing path")
 	}
 
-	// querystring
-	q := u.Query()
-	for k, v := range e.QueryStringParameters {
-		q.Set(k, v)
+	{
+		var query url.Values = mergeValues(
+			e.QueryStringParameters, e.MultiValueQueryStringParameters)
+		u.RawQuery = query.Encode()
 	}
-
-	for k, values := range e.MultiValueQueryStringParameters {
-		q[k] = values
-	}
-	u.RawQuery = q.Encode()
 
 	// base64 encoded body
 	body := e.Body
@@ -71,13 +79,7 @@ func NewRequest(ctx context.Context, e events.APIGatewayProxyRequest) (*http.Req
 	req.RemoteAddr = e.RequestContext.Identity.SourceIP
 
 	// header fields
-	for k, v := range e.Headers {
-		req.Header.Set(k, v)
-	}
-
-	for k, values := range e.MultiValueHeaders {
-		req.Header[k] = values
-	}
+	req.Header = header
 
 	// content-length
 	if req.Header.Get("Content-Length") == "" && body != "" {
