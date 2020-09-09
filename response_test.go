@@ -58,12 +58,15 @@ func TestResponseWriter_Write_text(t *testing.T) {
 		t.Run(kind, func(t *testing.T) {
 			w := NewResponse()
 			w.Header().Set("Content-Type", kind)
+			w.Header().Set("Double-Header", "1")
+			w.Header().Add("double-header", "2")
 			w.Write([]byte("hello world\n"))
 
 			e := w.End()
 			assert.Equal(t, 200, e.StatusCode)
 			assert.Equal(t, "hello world\n", e.Body)
 			assert.Equal(t, kind, e.Headers["Content-Type"])
+			assert.Equal(t, []string{"1", "2"}, e.MultiValueHeaders["Double-Header"])
 			assert.False(t, e.IsBase64Encoded)
 			assert.True(t, <-w.CloseNotify())
 		})
