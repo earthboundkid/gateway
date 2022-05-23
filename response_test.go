@@ -4,19 +4,19 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/tj/assert"
+	"github.com/carlmjohnson/be"
 )
 
 func Test_JSON_isTextMime(t *testing.T) {
-	assert.Equal(t, isTextMime("application/json"), true)
-	assert.Equal(t, isTextMime("application/json; charset=utf-8"), true)
-	assert.Equal(t, isTextMime("Application/JSON"), true)
+	be.Equal(t, isTextMime("application/json"), true)
+	be.Equal(t, isTextMime("application/json; charset=utf-8"), true)
+	be.Equal(t, isTextMime("Application/JSON"), true)
 }
 
 func Test_XML_isTextMime(t *testing.T) {
-	assert.Equal(t, isTextMime("application/xml"), true)
-	assert.Equal(t, isTextMime("application/xml; charset=utf-8"), true)
-	assert.Equal(t, isTextMime("ApPlicaTion/xMl"), true)
+	be.Equal(t, isTextMime("application/xml"), true)
+	be.Equal(t, isTextMime("application/xml; charset=utf-8"), true)
+	be.Equal(t, isTextMime("ApPlicaTion/xMl"), true)
 }
 
 func TestResponseWriter_Header(t *testing.T) {
@@ -27,7 +27,7 @@ func TestResponseWriter_Header(t *testing.T) {
 	var buf bytes.Buffer
 	w.header.Write(&buf)
 
-	assert.Equal(t, "Bar: baz\r\nFoo: bar\r\n", buf.String())
+	be.Equal(t, "Bar: baz\r\nFoo: bar\r\n", buf.String())
 }
 
 func TestResponseWriter_multiHeader(t *testing.T) {
@@ -40,7 +40,7 @@ func TestResponseWriter_multiHeader(t *testing.T) {
 	var buf bytes.Buffer
 	w.header.Write(&buf)
 
-	assert.Equal(t, "Bar: baz\r\nFoo: bar\r\nX-Apex: apex1\r\nX-Apex: apex2\r\n", buf.String())
+	be.Equal(t, "Bar: baz\r\nFoo: bar\r\nX-Apex: apex1\r\nX-Apex: apex2\r\n", buf.String())
 }
 
 func TestResponseWriter_Write_text(t *testing.T) {
@@ -63,12 +63,12 @@ func TestResponseWriter_Write_text(t *testing.T) {
 			w.Write([]byte("hello world\n"))
 
 			e := w.End()
-			assert.Equal(t, 200, e.StatusCode)
-			assert.Equal(t, "hello world\n", e.Body)
-			assert.Equal(t, kind, e.Headers["Content-Type"])
-			assert.Equal(t, []string{"1", "2"}, e.MultiValueHeaders["Double-Header"])
-			assert.False(t, e.IsBase64Encoded)
-			assert.True(t, <-w.CloseNotify())
+			be.Equal(t, 200, e.StatusCode)
+			be.Equal(t, "hello world\n", e.Body)
+			be.Equal(t, kind, e.Headers["Content-Type"])
+			be.AllEqual(t, []string{"1", "2"}, e.MultiValueHeaders["Double-Header"])
+			be.False(t, e.IsBase64Encoded)
+			be.True(t, <-w.CloseNotify())
 		})
 	}
 }
@@ -79,10 +79,10 @@ func TestResponseWriter_Write_binary(t *testing.T) {
 	w.Write([]byte("data"))
 
 	e := w.End()
-	assert.Equal(t, 200, e.StatusCode)
-	assert.Equal(t, "ZGF0YQ==", e.Body)
-	assert.Equal(t, "image/png", e.Headers["Content-Type"])
-	assert.True(t, e.IsBase64Encoded)
+	be.Equal(t, 200, e.StatusCode)
+	be.Equal(t, "ZGF0YQ==", e.Body)
+	be.Equal(t, "image/png", e.Headers["Content-Type"])
+	be.True(t, e.IsBase64Encoded)
 }
 
 func TestResponseWriter_Write_gzip(t *testing.T) {
@@ -92,10 +92,10 @@ func TestResponseWriter_Write_gzip(t *testing.T) {
 	w.Write([]byte("data"))
 
 	e := w.End()
-	assert.Equal(t, 200, e.StatusCode)
-	assert.Equal(t, "ZGF0YQ==", e.Body)
-	assert.Equal(t, "text/plain", e.Headers["Content-Type"])
-	assert.True(t, e.IsBase64Encoded)
+	be.Equal(t, 200, e.StatusCode)
+	be.Equal(t, "ZGF0YQ==", e.Body)
+	be.Equal(t, "text/plain", e.Headers["Content-Type"])
+	be.True(t, e.IsBase64Encoded)
 }
 
 func TestResponseWriter_WriteHeader(t *testing.T) {
@@ -104,7 +104,7 @@ func TestResponseWriter_WriteHeader(t *testing.T) {
 	w.Write([]byte("Not Found\n"))
 
 	e := w.End()
-	assert.Equal(t, 404, e.StatusCode)
-	assert.Equal(t, "Not Found\n", e.Body)
-	assert.Equal(t, "text/plain; charset=utf8", e.Headers["Content-Type"])
+	be.Equal(t, 404, e.StatusCode)
+	be.Equal(t, "Not Found\n", e.Body)
+	be.Equal(t, "text/plain; charset=utf8", e.Headers["Content-Type"])
 }

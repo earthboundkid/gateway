@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/tj/assert"
+	"github.com/carlmjohnson/be"
 )
 
 func TestNewRequest_path(t *testing.T) {
@@ -15,12 +15,12 @@ func TestNewRequest_path(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, "GET", r.Method)
-	assert.Equal(t, `/pets/luna`, r.URL.Path)
-	assert.Equal(t, `/pets/luna`, r.URL.String())
-	assert.Equal(t, `/pets/luna`, r.RequestURI)
+	be.Equal(t, "GET", r.Method)
+	be.Equal(t, `/pets/luna`, r.URL.Path)
+	be.Equal(t, `/pets/luna`, r.URL.String())
+	be.Equal(t, `/pets/luna`, r.RequestURI)
 }
 
 func TestNewRequest_method(t *testing.T) {
@@ -30,9 +30,9 @@ func TestNewRequest_method(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, "DELETE", r.Method)
+	be.Equal(t, "DELETE", r.Method)
 }
 
 func TestNewRequest_queryString(t *testing.T) {
@@ -46,10 +46,10 @@ func TestNewRequest_queryString(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `/pets?fields=name%2Cspecies&order=desc`, r.URL.String())
-	assert.Equal(t, `desc`, r.URL.Query().Get("order"))
+	be.Equal(t, `/pets?fields=name%2Cspecies&order=desc`, r.URL.String())
+	be.Equal(t, `desc`, r.URL.Query().Get("order"))
 }
 
 func TestNewRequest_multiValueQueryString(t *testing.T) {
@@ -67,12 +67,12 @@ func TestNewRequest_multiValueQueryString(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.URL.String())
-	assert.Equal(t, []string{"name", "species"}, r.URL.Query()["multi_fields"])
-	assert.Equal(t, []string{"arr1", "arr2"}, r.URL.Query()["multi_arr[]"])
-	assert.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.RequestURI)
+	be.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.URL.String())
+	be.AllEqual(t, []string{"name", "species"}, r.URL.Query()["multi_fields"])
+	be.AllEqual(t, []string{"arr1", "arr2"}, r.URL.Query()["multi_arr[]"])
+	be.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.RequestURI)
 }
 
 func TestNewRequest_remoteAddr(t *testing.T) {
@@ -87,9 +87,9 @@ func TestNewRequest_remoteAddr(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `1.2.3.4`, r.RemoteAddr)
+	be.Equal(t, `1.2.3.4`, r.RemoteAddr)
 }
 
 func TestNewRequest_header(t *testing.T) {
@@ -110,14 +110,14 @@ func TestNewRequest_header(t *testing.T) {
 	ctx := context.Background()
 	ctx = setHost(ctx, "xxx")
 	r, err := NewRequest(ctx, e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `example.com`, r.Host)
-	assert.Equal(t, `prod`, r.Header.Get("X-Stage"))
-	assert.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
-	assert.Equal(t, `18`, r.Header.Get("Content-Length"))
-	assert.Equal(t, `application/json`, r.Header.Get("Content-Type"))
-	assert.Equal(t, `bar`, r.Header.Get("X-Foo"))
+	be.Equal(t, `example.com`, r.Host)
+	be.Equal(t, `prod`, r.Header.Get("X-Stage"))
+	be.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
+	be.Equal(t, `18`, r.Header.Get("Content-Length"))
+	be.Equal(t, `application/json`, r.Header.Get("Content-Type"))
+	be.Equal(t, `bar`, r.Header.Get("X-Foo"))
 }
 
 func TestNewRequest_host(t *testing.T) {
@@ -137,8 +137,8 @@ func TestNewRequest_host(t *testing.T) {
 	ctx := context.Background()
 	ctx = setHost(ctx, "example.com")
 	r, err := NewRequest(ctx, e)
-	assert.NoError(t, err)
-	assert.Equal(t, `example.com`, r.Host)
+	be.NilErr(t, err)
+	be.Equal(t, `example.com`, r.Host)
 }
 
 func TestNewRequest_multiHeader(t *testing.T) {
@@ -162,16 +162,16 @@ func TestNewRequest_multiHeader(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `example.com`, r.Host)
-	assert.Equal(t, `prod`, r.Header.Get("X-Stage"))
-	assert.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
-	assert.Equal(t, `18`, r.Header.Get("Content-Length"))
-	assert.Equal(t, `application/json`, r.Header.Get("Content-Type"))
-	assert.Equal(t, `bar`, r.Header.Get("X-Foo"))
-	assert.Equal(t, []string{"apex1", "apex2"}, r.Header["X-APEX"])
-	assert.Equal(t, []string{"apex-1", "apex-2"}, r.Header["X-APEX-2"])
+	be.Equal(t, `example.com`, r.Host)
+	be.Equal(t, `prod`, r.Header.Get("X-Stage"))
+	be.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
+	be.Equal(t, `18`, r.Header.Get("Content-Length"))
+	be.Equal(t, `application/json`, r.Header.Get("Content-Type"))
+	be.Equal(t, `bar`, r.Header.Get("X-Foo"))
+	be.AllEqual(t, []string{"apex1", "apex2"}, r.Header["X-APEX"])
+	be.AllEqual(t, []string{"apex-1", "apex-2"}, r.Header["X-APEX-2"])
 }
 
 func TestNewRequest_body(t *testing.T) {
@@ -182,12 +182,12 @@ func TestNewRequest_body(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
 	b, err := ioutil.ReadAll(r.Body)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, `{ "name": "Tobi" }`, string(b))
+	be.Equal(t, `{ "name": "Tobi" }`, string(b))
 }
 
 func TestNewRequest_bodyBinary(t *testing.T) {
@@ -199,19 +199,19 @@ func TestNewRequest_bodyBinary(t *testing.T) {
 	}
 
 	r, err := NewRequest(context.Background(), e)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
 	b, err := ioutil.ReadAll(r.Body)
-	assert.NoError(t, err)
+	be.NilErr(t, err)
 
-	assert.Equal(t, "hello world\n", string(b))
+	be.Equal(t, "hello world\n", string(b))
 }
 
 func TestNewRequest_context(t *testing.T) {
 	e := events.APIGatewayProxyRequest{}
 	ctx := context.WithValue(context.Background(), "key", "value")
 	r, err := NewRequest(ctx, e)
-	assert.NoError(t, err)
-	v := r.Context().Value("key")
-	assert.Equal(t, "value", v)
+	be.NilErr(t, err)
+	v := r.Context().Value("key").(string)
+	be.Equal(t, "value", v)
 }
