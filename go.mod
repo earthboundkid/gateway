@@ -1,4 +1,4 @@
-module github.com/carlmjohnson/gateway
+module github.com/earthboundkid/gateway/v2
 
 go 1.27
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/carlmjohnson/gateway"
+	"github.com/earthboundkid/gateway/v2"
 )
 
 func Example() {
