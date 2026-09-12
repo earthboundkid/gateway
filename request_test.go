@@ -2,40 +2,41 @@ package gateway
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/carlmjohnson/be"
+	"github.com/earthboundkid/assert"
 )
 
 func TestNewRequest_path(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		Path: "/pets/luna",
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(context.Background(), e))
 
-	be.Equal(t, "GET", r.Method)
-	be.Equal(t, `/pets/luna`, r.URL.Path)
-	be.Equal(t, `/pets/luna`, r.URL.String())
-	be.Equal(t, `/pets/luna`, r.RequestURI)
+	be.Equal(r.Method, "GET")
+	be.Equal(r.URL.Path, `/pets/luna`)
+	be.Equal(r.URL.String(), `/pets/luna`)
+	be.Equal(r.RequestURI, `/pets/luna`)
 }
 
 func TestNewRequest_method(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "DELETE",
 		Path:       "/pets/luna",
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(t.Context(), e))
 
-	be.Equal(t, "DELETE", r.Method)
+	be.Equal(r.Method, "DELETE")
 }
 
 func TestNewRequest_queryString(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "GET",
 		Path:       "/pets",
@@ -45,14 +46,14 @@ func TestNewRequest_queryString(t *testing.T) {
 		},
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(t.Context(), e))
 
-	be.Equal(t, `/pets?fields=name%2Cspecies&order=desc`, r.URL.String())
-	be.Equal(t, `desc`, r.URL.Query().Get("order"))
+	be.Equal(r.URL.String(), `/pets?fields=name%2Cspecies&order=desc`)
+	be.Equal(r.URL.Query().Get("order"), `desc`)
 }
 
 func TestNewRequest_multiValueQueryString(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "GET",
 		Path:       "/pets",
@@ -66,16 +67,16 @@ func TestNewRequest_multiValueQueryString(t *testing.T) {
 		},
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(t.Context(), e))
 
-	be.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.URL.String())
-	be.AllEqual(t, []string{"name", "species"}, r.URL.Query()["multi_fields"])
-	be.AllEqual(t, []string{"arr1", "arr2"}, r.URL.Query()["multi_arr[]"])
-	be.Equal(t, `/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.RequestURI)
+	be.Equal(`/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.URL.String())
+	be.SlicesEqual([]string{"name", "species"}, r.URL.Query()["multi_fields"])
+	be.SlicesEqual([]string{"arr1", "arr2"}, r.URL.Query()["multi_arr[]"])
+	be.Equal(`/pets?fields=name%2Cspecies&multi_arr%5B%5D=arr1&multi_arr%5B%5D=arr2&multi_fields=name&multi_fields=species&order=desc`, r.RequestURI)
 }
 
 func TestNewRequest_remoteAddr(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "GET",
 		Path:       "/pets",
@@ -86,13 +87,13 @@ func TestNewRequest_remoteAddr(t *testing.T) {
 		},
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(t.Context(), e))
 
-	be.Equal(t, `1.2.3.4`, r.RemoteAddr)
+	be.Equal(`1.2.3.4`, r.RemoteAddr)
 }
 
 func TestNewRequest_header(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "POST",
 		Path:       "/pets",
@@ -107,20 +108,19 @@ func TestNewRequest_header(t *testing.T) {
 			Stage:     "prod",
 		},
 	}
-	ctx := context.Background()
-	ctx = setHost(ctx, "xxx")
-	r, err := NewRequest(ctx, e)
-	be.NilErr(t, err)
+	ctx := setHost(t.Context(), "xxx")
+	r := be.OK(NewRequest(ctx, e))
 
-	be.Equal(t, `example.com`, r.Host)
-	be.Equal(t, `prod`, r.Header.Get("X-Stage"))
-	be.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
-	be.Equal(t, `18`, r.Header.Get("Content-Length"))
-	be.Equal(t, `application/json`, r.Header.Get("Content-Type"))
-	be.Equal(t, `bar`, r.Header.Get("X-Foo"))
+	be.Equal(`example.com`, r.Host)
+	be.Equal(`prod`, r.Header.Get("X-Stage"))
+	be.Equal(`1234`, r.Header.Get("X-Request-Id"))
+	be.Equal(`18`, r.Header.Get("Content-Length"))
+	be.Equal(`application/json`, r.Header.Get("Content-Type"))
+	be.Equal(`bar`, r.Header.Get("X-Foo"))
 }
 
 func TestNewRequest_host(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "POST",
 		Path:       "/pets",
@@ -134,14 +134,13 @@ func TestNewRequest_host(t *testing.T) {
 			Stage:     "prod",
 		},
 	}
-	ctx := context.Background()
-	ctx = setHost(ctx, "example.com")
-	r, err := NewRequest(ctx, e)
-	be.NilErr(t, err)
-	be.Equal(t, `example.com`, r.Host)
+	ctx := setHost(t.Context(), "example.com")
+	r := be.OK(NewRequest(ctx, e))
+	be.Equal(r.Host, `example.com`)
 }
 
 func TestNewRequest_multiHeader(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "POST",
 		Path:       "/pets",
@@ -161,36 +160,33 @@ func TestNewRequest_multiHeader(t *testing.T) {
 		},
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
+	r := be.OK(NewRequest(t.Context(), e))
 
-	be.Equal(t, `example.com`, r.Host)
-	be.Equal(t, `prod`, r.Header.Get("X-Stage"))
-	be.Equal(t, `1234`, r.Header.Get("X-Request-Id"))
-	be.Equal(t, `18`, r.Header.Get("Content-Length"))
-	be.Equal(t, `application/json`, r.Header.Get("Content-Type"))
-	be.Equal(t, `bar`, r.Header.Get("X-Foo"))
-	be.AllEqual(t, []string{"apex1", "apex2"}, r.Header["X-APEX"])
-	be.AllEqual(t, []string{"apex-1", "apex-2"}, r.Header["X-APEX-2"])
+	be.Equal(`example.com`, r.Host)
+	be.Equal(`prod`, r.Header.Get("X-Stage"))
+	be.Equal(`1234`, r.Header.Get("X-Request-Id"))
+	be.Equal(`18`, r.Header.Get("Content-Length"))
+	be.Equal(`application/json`, r.Header.Get("Content-Type"))
+	be.Equal(`bar`, r.Header.Get("X-Foo"))
+	be.SlicesEqual([]string{"apex1", "apex2"}, r.Header["X-APEX"])
+	be.SlicesEqual([]string{"apex-1", "apex-2"}, r.Header["X-APEX-2"])
 }
 
 func TestNewRequest_body(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod: "POST",
 		Path:       "/pets",
 		Body:       `{ "name": "Tobi" }`,
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
-
-	b, err := ioutil.ReadAll(r.Body)
-	be.NilErr(t, err)
-
-	be.Equal(t, `{ "name": "Tobi" }`, string(b))
+	r := be.OK(NewRequest(t.Context(), e))
+	b := be.OK(io.ReadAll(r.Body))
+	be.Equal(string(b), `{ "name": "Tobi" }`)
 }
 
 func TestNewRequest_bodyBinary(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{
 		HTTPMethod:      "POST",
 		Path:            "/pets",
@@ -198,20 +194,16 @@ func TestNewRequest_bodyBinary(t *testing.T) {
 		IsBase64Encoded: true,
 	}
 
-	r, err := NewRequest(context.Background(), e)
-	be.NilErr(t, err)
-
-	b, err := ioutil.ReadAll(r.Body)
-	be.NilErr(t, err)
-
-	be.Equal(t, "hello world\n", string(b))
+	r := be.OK(NewRequest(t.Context(), e))
+	b := be.OK(io.ReadAll(r.Body))
+	be.Equal(string(b), "hello world\n")
 }
 
 func TestNewRequest_context(t *testing.T) {
+	be := assert.FailsNow(t)
 	e := events.APIGatewayProxyRequest{}
-	ctx := context.WithValue(context.Background(), "key", "value")
-	r, err := NewRequest(ctx, e)
-	be.NilErr(t, err)
+	ctx := context.WithValue(t.Context(), "key", "value")
+	r := be.OK(NewRequest(ctx, e))
 	v := r.Context().Value("key").(string)
-	be.Equal(t, "value", v)
+	be.Equal(v, "value")
 }

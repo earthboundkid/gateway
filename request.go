@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -25,9 +26,7 @@ func mergeValues(single map[string]string, multi map[string][]string) map[string
 		m[k] = []string{v}
 	}
 	// Let multi trump single if both are set
-	for k, v := range multi {
-		m[k] = v
-	}
+	maps.Copy(m, multi)
 	return m
 }
 
