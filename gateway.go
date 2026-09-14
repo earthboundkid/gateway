@@ -4,7 +4,7 @@ package gateway
 import (
 	"net/http"
 
-	gw "github.com/earthboundkid/gateway/v2"
+	"github.com/earthboundkid/gateway/v2"
 )
 
 // ListenAndServe is a drop-in replacement for
@@ -17,5 +17,5 @@ import (
 //
 //go:fix inline
 func ListenAndServe(host string, h http.Handler) error {
-	return gw.ListenAndServe(host, h)
+	return gateway.ListenAndServe(host, h)
 }
