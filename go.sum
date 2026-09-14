@@ -4,6 +4,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/earthboundkid/assert v0.26.6 h1:EZwMt6+i9dsnJ7+VEyDjHjfnlcZyXtYCgzMfxvxOUR0=
 github.com/earthboundkid/assert v0.26.6/go.mod h1:vctZ82uDOVsYzYb4NP94i/+QRzfJKM2UoNjoehSHODI=
+github.com/earthboundkid/gateway/v2 v2.26.1 h1:8UoqhB9ZQOAK3mWRgJuFhfCsnZB7ynOVDTygvdK9TJE=
+github.com/earthboundkid/gateway/v2 v2.26.1/go.mod h1:tz++YAgks600Qj5j62qbnb2zoaoxfcd4xdAVNrqMU4g=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=

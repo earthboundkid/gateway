@@ -1,51 +1,10 @@
 package gateway
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/earthboundkid/assert"
 )
-
-func Test_JSON_isTextMime(t *testing.T) {
-	be := assert.FailsNow(t)
-	be.True(isTextMime("application/json"))
-	be.True(isTextMime("application/json; charset=utf-8"))
-	be.True(isTextMime("Application/JSON"))
-}
-
-func Test_XML_isTextMime(t *testing.T) {
-	be := assert.FailsNow(t)
-	be.True(isTextMime("application/xml"))
-	be.True(isTextMime("application/xml; charset=utf-8"))
-	be.True(isTextMime("ApPlicaTion/xMl"))
-}
-
-func TestResponseWriter_Header(t *testing.T) {
-	be := assert.FailsNow(t)
-	w := NewResponse()
-	w.Header().Set("Foo", "bar")
-	w.Header().Set("Bar", "baz")
-
-	var buf bytes.Buffer
-	w.header.Write(&buf)
-
-	be.Equal("Bar: baz\r\nFoo: bar\r\n", buf.String())
-}
-
-func TestResponseWriter_multiHeader(t *testing.T) {
-	be := assert.FailsNow(t)
-	w := NewResponse()
-	w.Header().Set("Foo", "bar")
-	w.Header().Set("Bar", "baz")
-	w.Header().Add("X-APEX", "apex1")
-	w.Header().Add("X-APEX", "apex2")
-
-	var buf bytes.Buffer
-	w.header.Write(&buf)
-
-	be.Equal("Bar: baz\r\nFoo: bar\r\nX-Apex: apex1\r\nX-Apex: apex2\r\n", buf.String())
-}
 
 func TestResponseWriter_Write_text(t *testing.T) {
 	types := []string{

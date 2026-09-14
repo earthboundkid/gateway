@@ -2,11 +2,9 @@
 package gateway
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
+	gw "github.com/earthboundkid/gateway/v2"
 )
 
 // ListenAndServe is a drop-in replacement for
@@ -16,22 +14,8 @@ import (
 // does not always send with events.
 //
 // ListenAndServe never returns.
+//
+//go:fix inline
 func ListenAndServe(host string, h http.Handler) error {
-	if h == nil {
-		h = http.DefaultServeMux
-	}
-
-	lambda.Start(func(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		ctx = setHost(ctx, host)
-		r, err := NewRequest(ctx, e)
-		if err != nil {
-			return events.APIGatewayProxyResponse{}, err
-		}
-
-		w := NewResponse()
-		h.ServeHTTP(w, r)
-		return w.End(), nil
-	})
-
-	panic("unreachable")
+	return gw.ListenAndServe(host, h)
 }
